@@ -1,7 +1,15 @@
 #import <Cocoa/Cocoa.h>
 
-void recompile() {
-    
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+
+static lua_State *L;
+static void interpreterInit() {
+    L = luaL_newstate();
+    luaL_openlibs(L);
+
+    luaL_dofile(L, "language.lua");
 }
 
 @interface IdeTextStorageDelegate: NSObject<NSTextStorageDelegate>
@@ -13,7 +21,8 @@ void recompile() {
   didProcessEditing:(NSTextStorageEditActions)editedMask 
               range:(NSRange)editedRange 
      changeInLength:(NSInteger)delta {
-    NSLog(@"hi");    
+    id contents = [textStorage string];
+    
 }
 @end
 
@@ -21,6 +30,8 @@ void recompile() {
 @end
 
 @implementation IdeApplication
+/* from https://stackoverflow.com/questions/970707/cocoa-keyboard-shortcuts-in-dialog-without-an-edit-menu
+   hack around not having a real Edit menu => not having edit keyboard shortcuts */
 - (void) sendEvent:(NSEvent *)event {
     if ([event type] == NSKeyDown) {
         if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask) {
@@ -61,6 +72,8 @@ void recompile() {
 @end
 
 int main() {
+    interpreterInit();
+
     @autoreleasepool {
         [IdeApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
