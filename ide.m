@@ -6,13 +6,25 @@
 
 #include "watch.h"
 
+static NSTextView *textView;
+
 static lua_State *L;
 static void interpreterInit() {
     L = luaL_newstate();
     luaL_openlibs(L);
 }
 
+static int l_setDefaultFont(lua_State *L) {
+    NSString *fontName = [NSString stringWithUTF8String:luaL_checkstring(L, 1)];
+    int fontSize = luaL_checknumber(L, 2);
+    [textView setFont:[NSFont fontWithName:fontName size:fontSize]];
+    return 0;
+}
+
 static void interpreterRun() {
+    lua_pushcfunction(L, l_setDefaultFont);
+    lua_setglobal(L, "setdefaultfont");
+
     luaL_dofile(L, "language.lua");
 }
 
@@ -89,14 +101,36 @@ int main() {
         id applicationName = [[NSProcessInfo processInfo] processName];
 
         NSRect contentFrame = NSMakeRect(0, 0, 600, 600);
-        id window = [[NSWindow alloc] initWithContentRect:contentFrame
-                                                styleMask:NSTitledWindowMask
-                                                  backing:NSBackingStoreBuffered defer:NO];
+        id window = [[NSWindow alloc]
+                        initWithContentRect:contentFrame
+                                  styleMask:NSTitledWindowMask | NSWindowStyleMaskResizable
+                                    backing:NSBackingStoreBuffered
+                                      defer:NO];
 
-        id textView = [[NSTextView alloc] initWithFrame:contentFrame];
+        // from https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextUILayer/Tasks/TextInScrollView.html#//apple_ref/doc/uid/20000938-164652
+        NSScrollView *scrollView = [[NSScrollView alloc]
+                                       initWithFrame:[[window contentView] frame]];
+        NSSize contentSize = [scrollView contentSize];
+        [scrollView setBorderType:NSNoBorder];
+        [scrollView setHasVerticalScroller:YES];
+        [scrollView setHasHorizontalScroller:YES];
+        [scrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+
+        textView = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, contentSize.width, contentSize.height)];
+        [textView setMinSize:NSMakeSize(0.0, contentSize.height)];
+        [textView setMaxSize:NSMakeSize(FLT_MAX, FLT_MAX)];
+        [textView setVerticallyResizable:YES];
+        [textView setHorizontallyResizable:YES];
+        [textView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+        // The order of the following 2 lines matters! WTF?
+        [[textView textContainer] setWidthTracksTextView:NO];
+        [[textView textContainer] setContainerSize:NSMakeSize(FLT_MAX, FLT_MAX)];
+ 
         id textStorageDelegate = [[IdeTextStorageDelegate alloc] init];
         [[textView textStorage] setDelegate:textStorageDelegate];
-        [window setContentView:textView];
+
+        [scrollView setDocumentView:textView];
+        [window setContentView:scrollView];
         [window makeFirstResponder:textView];
 
         [window cascadeTopLeftFromPoint:NSMakePoint(20,20)];

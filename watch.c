@@ -7,18 +7,14 @@ static void callbackWrapper(
     size_t numEvents,
     void *eventPaths,
     const FSEventStreamEventFlags eventFlags[],
-    const FSEventStreamEventId eventIds[])
-{
-    char **paths = eventPaths;
-
+    const FSEventStreamEventId eventIds[]) {
     void (*callback)() = clientCallbackInfo;
     callback();
 }
 
 void watch(const char *path, void (*callback)()) {
     /* Define variables and create a CFArray object containing
-       CFString objects containing paths to watch.
-     */
+       CFString objects containing paths to watch. */
     CFStringRef pathToWatch = CFStringCreateWithCString(kCFAllocatorDefault,
                                                         path,
                                                         kCFStringEncodingUTF8);
