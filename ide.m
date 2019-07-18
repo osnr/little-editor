@@ -56,8 +56,8 @@ static void interpreterHook(const char *s) {
 /* from https://stackoverflow.com/questions/970707/cocoa-keyboard-shortcuts-in-dialog-without-an-edit-menu
    hack around not having a real Edit menu => not having edit keyboard shortcuts */
 - (void) sendEvent:(NSEvent *)event {
-    if ([event type] == NSKeyDown) {
-        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask) {
+    if ([event type] == NSEventTypeKeyDown) {
+        if (([event modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand) {
             if ([[event charactersIgnoringModifiers] isEqualToString:@"x"]) {
                 if ([self sendAction:@selector(cut:) to:nil from:self])
                     return;
@@ -79,7 +79,7 @@ static void interpreterHook(const char *s) {
                     return;
             }
         }
-        else if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == (NSCommandKeyMask | NSShiftKeyMask)) {
+        else if (([event modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask) == (NSEventModifierFlagCommand | NSEventModifierFlagShift)) {
             if ([[event charactersIgnoringModifiers] isEqualToString:@"Z"]) {
                 if ([self sendAction:@selector(redo:) to:nil from:self])
                     return;
@@ -103,7 +103,7 @@ int main() {
         NSRect contentFrame = NSMakeRect(0, 0, 600, 600);
         id window = [[NSWindow alloc]
                         initWithContentRect:contentFrame
-                                  styleMask:NSTitledWindowMask | NSWindowStyleMaskResizable
+                                  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable
                                     backing:NSBackingStoreBuffered
                                       defer:NO];
 
