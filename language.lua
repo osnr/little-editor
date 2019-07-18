@@ -1,4 +1,4 @@
-print("hi")
+print("hi! gr eat! what!?")
 
 function parse(s)
 

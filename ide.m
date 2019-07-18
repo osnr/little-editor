@@ -4,16 +4,19 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#include "watch.h"
+
 static lua_State *L;
 static void interpreterInit() {
     L = luaL_newstate();
     luaL_openlibs(L);
+}
 
+static void interpreterRun() {
     luaL_dofile(L, "language.lua");
 }
 
 @interface IdeTextStorageDelegate: NSObject<NSTextStorageDelegate>
-
 @end
 
 @implementation IdeTextStorageDelegate
@@ -73,6 +76,7 @@ static void interpreterInit() {
 
 int main() {
     interpreterInit();
+    watch("language.lua", &interpreterRun);
 
     @autoreleasepool {
         [IdeApplication sharedApplication];
@@ -93,6 +97,7 @@ int main() {
         [window cascadeTopLeftFromPoint:NSMakePoint(20,20)];
         [window setTitle: applicationName];
         [window makeKeyAndOrderFront:nil];
+
         [NSApp activateIgnoringOtherApps:YES];
         [NSApp run];
     }
