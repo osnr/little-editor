@@ -16,6 +16,14 @@ static void interpreterRun() {
     luaL_dofile(L, "language.lua");
 }
 
+static void interpreterHook(const char *s) {
+    lua_getglobal(L, "hook");
+    if (lua_isfunction(L, -1)) {
+        lua_pushstring(L, s);
+        lua_pcall(L, 1, 0, 0);
+    }
+}
+
 @interface IdeTextStorageDelegate: NSObject<NSTextStorageDelegate>
 @end
 
@@ -24,8 +32,8 @@ static void interpreterRun() {
   didProcessEditing:(NSTextStorageEditActions)editedMask 
               range:(NSRange)editedRange 
      changeInLength:(NSInteger)delta {
-    id contents = [textStorage string];
-    
+    id string = [textStorage string];
+    interpreterHook([string UTF8String]);
 }
 @end
 
@@ -69,15 +77,12 @@ static void interpreterRun() {
     [super sendEvent:event];
 }
 
-// Blank Selectors to silence Xcode warnings: 'Undeclared selector undo:/redo:'
+// Blank selectors to silence Xcode warnings: 'Undeclared selector undo:/redo:'
 - (IBAction)undo:(id)sender {}
 - (IBAction)redo:(id)sender {}
 @end
 
 int main() {
-    interpreterInit();
-    watch("language.lua", &interpreterRun);
-
     @autoreleasepool {
         [IdeApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -97,6 +102,16 @@ int main() {
         [window cascadeTopLeftFromPoint:NSMakePoint(20,20)];
         [window setTitle: applicationName];
         [window makeKeyAndOrderFront:nil];
+
+        // Now that we have all the editor UI,
+        // initialize and first-run the Lua script.
+        interpreterInit();
+        interpreterRun();
+
+        // Set up a file-watcher that will rerun when the Lua script
+        // changes. (It runs on the single main CF run loop on the
+        // NSApp, I think, so no threading issues!)
+        watch("language.lua", &interpreterRun);
 
         [NSApp activateIgnoringOtherApps:YES];
         [NSApp run];

@@ -1,5 +1,5 @@
-print("hi! gr eat! what!?")
+print("Running language.lua!")
 
-function parse(s)
-
+function hook(s)
+   print("new string: ["..s.."]")
 end
