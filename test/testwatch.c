@@ -5,7 +5,7 @@ void callback() {
 }
 
 int main() {
-    watch("../language.lua", &callback);
+    watch("../editor.lua", &callback);
 
     CFRunLoopRun();
 }

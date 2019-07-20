@@ -1,4 +1,4 @@
-print("Running language.lua!")
+print("Running editor.lua!")
 
 setdefaultfont("Menlo", 15)
 

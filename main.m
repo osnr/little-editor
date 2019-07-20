@@ -6,6 +6,8 @@
 
 #include "watch.h"
 
+static const char *EDITOR_LUA = "editor.lua";
+
 static NSTextView *textView;
 
 static lua_State *L;
@@ -72,7 +74,7 @@ static void interpreterRun() {
     lua_pushcfunction(L, l_addattribute);
     lua_setglobal(L, "addattribute");
 
-    luaL_dofile(L, "language.lua");
+    luaL_dofile(L, EDITOR_LUA);
 }
 
 static void interpreterHook(const char *s) {
@@ -197,7 +199,7 @@ int main() {
         // Set up a file-watcher that will rerun when the Lua script
         // changes. (It runs on the single main CF run loop on the
         // NSApp, I think, so no threading issues!)
-        watch("language.lua", &interpreterWatchCallback);
+        watch(EDITOR_LUA, &interpreterWatchCallback);
 
         [NSApp activateIgnoringOtherApps:YES];
         [NSApp run];
