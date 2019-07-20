@@ -36,6 +36,7 @@ interpreter.
 
 ```
 $ git clone https://github.com/osnr/little-editor.git
+$ cd little-editor
 $ git submodule update --init --recursive
 $ make lua
 $ make
