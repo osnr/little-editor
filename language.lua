@@ -3,8 +3,13 @@ print("Running language.lua!")
 setdefaultfont("Menlo", 15)
 
 function hook(s)
-   print(math.floor(#s /2))
-   removeattribute("NSBackgroundColor", makerange(1, #s))
-   addattribute("NSBackgroundColor", makecolor("orangeColor"), makerange(1, math.floor(#s/2)))
-   print("new string: ["..s.."]")
+   removeattribute("NSColor", makerange(1, #s))
+
+   local i, j = 0, 0
+   while true do
+      i, j = s:find('hi!', i + 1)
+      if i == nil then break end
+      addattribute("NSColor", makecolor("orangeColor"),
+                   makerange(i, j - i + 1))
+   end
 end
