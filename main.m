@@ -132,6 +132,11 @@ static void interpreterWatchCallback() {
                 if ([self sendAction:@selector(selectAll:) to:nil from:self])
                     return;
             }
+            else if ([[event charactersIgnoringModifiers] isEqualToString:@"q"]) {
+                if ([self sendAction:@selector(terminate:) to:nil from:self]) {
+                    return;
+                }
+            }
         }
         else if (([event modifierFlags] & NSEventModifierFlagDeviceIndependentFlagsMask) == (NSEventModifierFlagCommand | NSEventModifierFlagShift)) {
             if ([[event charactersIgnoringModifiers] isEqualToString:@"Z"]) {
